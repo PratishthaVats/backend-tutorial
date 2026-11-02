@@ -1,0 +1,350 @@
+{
+  "info": {
+    "_postman_id": "c1a2b3d4-e5f6-4789-abcd-ef0123456789",
+    "name": "Backend Development Assignment — Express & MongoDB",
+    "description": "Postman Collection for University Backend Tutorial Assignment. Covers Health Check, Authentication (Register, Login), and full CRUD operations on Posts.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "postId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Server reports healthy status\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "    pm.expect(jsonData.message).to.be.a(\"string\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "health"]
+        },
+        "description": "Checks if the server is up and responsive."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Register User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"User registered without exposing password\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "    pm.expect(jsonData.data).to.have.property(\"_id\");",
+              "    pm.expect(jsonData.data).to.have.property(\"email\");",
+              "    pm.expect(jsonData.data).to.not.have.property(\"password\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"teststudent\",\n  \"email\": \"teststudent@example.com\",\n  \"password\": \"Secur3Pass!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "users", "register"]
+        },
+        "description": "Registers a new user and returns user info without password."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Login User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Login successful\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "    pm.expect(jsonData.data.email).to.eql(\"teststudent@example.com\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"teststudent@example.com\",\n  \"password\": \"Secur3Pass!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "users", "login"]
+        },
+        "description": "Authenticates a registered user with email and password."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Create Post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"Post created and ID saved to collection variable\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "    pm.expect(jsonData.data).to.have.property(\"_id\");",
+              "    pm.collectionVariables.set(\"postId\", jsonData.data._id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Student Research Paper\",\n  \"description\": \"Exploring RESTful architectures and Node.js microservices\",\n  \"age\": 21\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/create",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "posts", "create"]
+        },
+        "description": "Creates a new post document and saves its _id to the postId variable."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Get All Posts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Posts array returned\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "    pm.expect(jsonData.data).to.be.an(\"array\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "posts"]
+        },
+        "description": "Retrieves all posts sorted by creation date descending."
+      },
+      "response": []
+    },
+    {
+      "name": "6. Get Post by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Retrieved post matches requested ID\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "    pm.expect(jsonData.data._id).to.eql(pm.collectionVariables.get(\"postId\"));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/{{postId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "posts", "{{postId}}"]
+        },
+        "description": "Retrieves a single post using the dynamic postId collection variable."
+      },
+      "response": []
+    },
+    {
+      "name": "7. Update Post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Post data is updated\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "    pm.expect(jsonData.data.age).to.eql(22);",
+              "    pm.expect(jsonData.data.name).to.eql(\"Updated Student Research Paper\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Student Research Paper\",\n  \"description\": \"Revised edition with database performance benchmarks\",\n  \"age\": 22\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/{{postId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "posts", "{{postId}}"]
+        },
+        "description": "Updates an existing post by ID."
+      },
+      "response": []
+    },
+    {
+      "name": "8. Delete Post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Delete confirmation received\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(true);",
+              "    pm.expect(jsonData.message).to.include(\"deleted\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/{{postId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "posts", "{{postId}}"]
+        },
+        "description": "Deletes the post document from MongoDB Atlas."
+      },
+      "response": []
+    },
+    {
+      "name": "9. Verify Deleted Post Returns 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "pm.test(\"Returns error message\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.eql(false);",
+              "    pm.expect(jsonData.message).to.eql(\"Post not found\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/posts/{{postId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "posts", "{{postId}}"]
+        },
+        "description": "Verifies that subsequent GET on the deleted ID returns 404."
+      },
+      "response": []
+    }
+  ]
+}
